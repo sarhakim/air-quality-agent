@@ -1,6 +1,6 @@
 
-from datetime import datetime
 import os
+from datetime import datetime
 from enum import StrEnum
 
 from dotenv import load_dotenv
@@ -60,6 +60,11 @@ User: "What was the air quality on December 1, 2025?"
 User: "Was there a lot of ozone on April 15, 2026?"
 → Call detect_anomaly("2026-04-15") → Call get_weather_context("2026-04-15")
 → Always report O3 max_day (not mean_day). If max_day > 100 µg/m³, mention proximity to EEA threshold of 120 µg/m³.
+
+User: "What caused the poor air quality on March 8, 2026?"
+→ Call detect_anomaly("2026-03-08") → is_anomaly=true → Call get_weather_context("2026-03-08")
+→ When wind_speed_mean < 5 km/h and precipitation=0, describe it as "anticyclonic stagnation conditions" — high pressure blocking wind and preventing pollutant dispersion.
+→ Answer: "The anomaly was caused by Saharan dust + elevated PM2.5, amplified by anticyclonic stagnation conditions (weak wind of X km/h, no precipitation, high humidity)."
 """
 
 

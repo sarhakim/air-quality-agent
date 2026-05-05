@@ -177,7 +177,7 @@
                 "jours"
             ]
         },
-        "ground_truth": "Résumé sur 30 jours avec comptage des jours anomaux."
+        "ground_truth": "0 anomalie détectée sur les 30 derniers jours (5 avril - 5 mai 2026). AQI max=52, sous le seuil de 62. Pire jour : 9 avril 2026. La réponse est correcte si elle indique 0 anomalie avec les valeurs AQI."
     },
     {
         "id": "weather_001",

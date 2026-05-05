@@ -43,7 +43,7 @@ class LangSmithEvaluator(BaseEvaluator):
         score = int(all(t in tools_called for t in expected_tools))
         return EvaluationResult(key="tools_ok", score=score)
 
-    def _judge_evaluator(self, run, example) -> list[EvaluationResult]:
+    def _judge_evaluator(self, run, example) -> list[dict]:
         """LLM-as-judge evaluator."""
         question = example.inputs.get("inputs_1", "")
         answer = run.outputs.get("output", "")
@@ -51,10 +51,10 @@ class LangSmithEvaluator(BaseEvaluator):
         result = self._llm_as_judge(question, answer, ground_truth)
         
         return [
-            EvaluationResult(key="judge_score", score=result["score"]),
-            EvaluationResult(key="judge_reasoning", score=None, comment=result["reasoning"]),
+            {"key": "judge_score", "score": result["score"]},
+            {"key": "judge_reasoning", "score": None, "comment": result["reasoning"]},
         ]
 
 
 if __name__ == "__main__":
-    LangSmithEvaluator(agent_model=AgentModel.HAIKU).run(experiment_prefix="haiku-v1")
+    LangSmithEvaluator(agent_model=AgentModel.HAIKU).run(experiment_prefix="haiku-v2")
