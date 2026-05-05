@@ -32,6 +32,15 @@ cp .env.example .env
 uv run main.py
 ```
 
+## Demo
+
+```bash
+uv run streamlit run app.py
+```
+
+A conversational interface to query the agent in natural language — ask about specific dates, 
+current conditions, or anomaly summaries.
+
 ## Evaluation
 
 ### Dataset
@@ -55,7 +64,6 @@ Evaluated with Claude Haiku as LLM-as-judge, tracked via LangSmith.
  
 ![Results](doc/experiments_comparison.png)
 
-Results tracked on [LangSmith](https://smith.langchain.com/o/a3d7dfbe-9c58-48f5-9dbf-62937abd2574/datasets/34458ffc-a1e9-414c-a0b3-dd6ed0a60676).
  
 ### Key findings
  
@@ -68,9 +76,10 @@ Results tracked on [LangSmith](https://smith.langchain.com/o/a3d7dfbe-9c58-48f5-
 ## Known Limitations
  
 - **Spatial resolution**: Open-Meteo CAMS model at ~11km resolution — no arrondissement-level granularity (AirParif API would be needed)
-- **Static snapshot**: data covers Feb–May 2026; regenerate snapshot for newer data
+- **Reproducibility**: evaluation relies on a static snapshot (Feb–May 2026). Without it, the Open-Meteo API only provides a rolling 90-day window, making results non-reproducible over time.
 - **Ozone detection**: daily AQI threshold misses hourly O3 peaks — `max_day` is reported but not used for anomaly classification
 - **Model dependency**: multi-step tool calling requires Claude Haiku or better — Llama 3.1 8B fails on sequential tool calls
+- **Judge reproducibility**: LLM-as-judge uses `temperature=0` for deterministic scoring across runs.
 
 ## Data Sources
  

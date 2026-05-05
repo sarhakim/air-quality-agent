@@ -68,6 +68,7 @@ class BaseEvaluator:
                 {"role": "user", "content": prompt},
                 {"role": "assistant", "content": "{"},
             ],
+            temperature=0
         )
         raw = "{" + response.content[0].text.strip()
         try:
