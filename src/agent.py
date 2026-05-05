@@ -1,6 +1,6 @@
 
 import os
-from enum import Enum
+from enum import StrEnum
 
 from langchain_core.messages import SystemMessage
 from langgraph.graph import END, START, MessagesState, StateGraph
@@ -35,7 +35,8 @@ Tool calling sequence for anomaly questions:
 3. Then provide your final answer
 """
 
-class AgentModel(str, Enum):
+
+class AgentModel(StrEnum):
     """Supported LLM models for the agent."""
     HAIKU = "claude-haiku-4-5-20251001"
     SONNET = "claude-sonnet-4-20250514"
