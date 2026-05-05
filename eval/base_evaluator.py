@@ -17,7 +17,7 @@ Ground truth: {ground_truth}
 Evaluate on: factual accuracy, completeness, clarity.
 Respond with this JSON:
 {{
-    "score": <1-5>,
+    "score": <float between 0.0 and 1.0>,
     "factual_accuracy": <true/false>,
     "completeness": <true/false>,
     "reasoning": "<one sentence>"

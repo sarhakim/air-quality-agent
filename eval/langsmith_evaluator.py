@@ -1,6 +1,7 @@
 
 from dotenv import load_dotenv
 from langsmith.evaluation import EvaluationResult, evaluate
+from langsmith.schemas import Example, Run
 
 from eval.base_evaluator import BaseEvaluator
 from src.agent import AgentModel
@@ -34,16 +35,16 @@ class LangSmithEvaluator(BaseEvaluator):
         agent_output = self._invoke_agent(example["inputs_1"])
         return {"output": agent_output["answer"], "tools_called": agent_output["tools_called"]}
 
-    def _tools_ok_evaluator(self, run, example) -> EvaluationResult:
+    def _tools_ok_evaluator(self, run: Run, example: Example) -> EvaluationResult:
         """Checks if the agent called the expected tools."""
-        case_id = example.outputs.get("id")
+        case_id = example.metadata["id"]
         case = self.dataset_by_id.get(case_id, {})
         expected_tools = case.get("expected", {}).get("tools_called", [])
         tools_called = run.outputs.get("tools_called", [])
         score = int(all(t in tools_called for t in expected_tools))
         return EvaluationResult(key="tools_ok", score=score)
 
-    def _judge_evaluator(self, run, example) -> list[dict]:
+    def _judge_evaluator(self, run: Run, example: Example) -> list[dict]:
         """LLM-as-judge evaluator."""
         question = example.inputs.get("inputs_1", "")
         answer = run.outputs.get("output", "")
