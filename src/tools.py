@@ -9,11 +9,16 @@ from src.ingestion import AirQualityIngestion
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SNAPSHOT_PATH = os.path.join(BASE_DIR, "data", "air_quality_snapshot.csv")
 
-def _load_data() -> pd.DataFrame:
+def load_data() -> pd.DataFrame:
     """Loads air quality data from snapshot if available, otherwise fetches from API."""
     if os.path.exists(SNAPSHOT_PATH):
         return pd.read_csv(SNAPSHOT_PATH, parse_dates=["date"])
     return AirQualityIngestion(past_days=90).fetch_all()
+
+def compute_threshold(df: pd.DataFrame) -> float:
+    """Computes the AQI anomaly threshold (daily max mean + 2 std)."""
+    daily_max = df.groupby(df["date"].dt.date)["european_aqi"].max()
+    return float(daily_max.mean() + 2 * daily_max.std())
 
 
 @tool
@@ -37,7 +42,7 @@ def detect_anomaly(date: str) -> dict:
     Args:
         date: date in YYYY-MM-DD format. Must be within the data window (Feb-May 2026).
     """
-    df = _load_data()
+    df = load_data()
 
     df["day"] = df["date"].dt.date
     target_day = pd.to_datetime(date).date()
@@ -47,8 +52,7 @@ def detect_anomaly(date: str) -> dict:
         return {"error": f"No data available for {date}"}
 
     # Daily max per day for a consistent baseline
-    daily_max = df.groupby("day")["european_aqi"].max()
-    aqi_threshold = daily_max.mean() + 2 * daily_max.std()
+    aqi_threshold = compute_threshold(df_day)
 
     aqi_max = df_day["european_aqi"].max()
     aqi_mean = df_day["european_aqi"].mean()
@@ -108,7 +112,7 @@ def get_weather_context(date: str) -> dict:
     Args:
         date: date in YYYY-MM-DD format.
     """
-    df = _load_data()
+    df = load_data()
 
     df["day"] = df["date"].dt.date
     target_day = pd.to_datetime(date).date()
@@ -142,7 +146,7 @@ def get_current_data() -> dict:
 
     Do NOT use for questions about specific past dates — use detect_anomaly instead.
     """
-    df = _load_data()
+    df = load_data()
     now = datetime.now(UTC)
     df_past = df[df["date"] <= now].dropna()
     latest = df_past.iloc[-1]
@@ -174,7 +178,7 @@ def summarize_situation(days: int = 7) -> dict:
     Args:
         days: number of past days to summarize (default: 7, max: 90).
     """
-    df = _load_data()
+    df = load_data()
 
     df["day"] = df["date"].dt.date
     cutoff = df["day"].max() - pd.Timedelta(days=days)
@@ -187,8 +191,7 @@ def summarize_situation(days: int = 7) -> dict:
     daily_max = df_period.groupby("day")["european_aqi"].max()
 
     # Threshold from full history
-    full_daily_max = df.groupby("day")["european_aqi"].max()
-    aqi_threshold = full_daily_max.mean() + 2 * full_daily_max.std()
+    aqi_threshold = compute_threshold(df)
 
     anomaly_days = daily_max[daily_max > aqi_threshold]
     worst_day = daily_max.idxmax()

@@ -1,5 +1,3 @@
-# ingestion.py
-
 from datetime import datetime, timedelta
 
 import openmeteo_requests
