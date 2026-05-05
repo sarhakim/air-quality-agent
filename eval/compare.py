@@ -1,5 +1,3 @@
-# eval/compare.py
-
 import json
 import os
 
@@ -7,7 +5,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from eval.config import DATASET_PATH, RUNS_DIR
-from eval.evaluator import Evaluator
+from eval.local_evaluator import Evaluator
 from src.agent import AgentModel
 
 load_dotenv()

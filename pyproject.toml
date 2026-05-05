@@ -10,6 +10,7 @@ dependencies = [
     "langchain-anthropic>=1.4.3",
     "langchain-ollama>=1.1.0",
     "langgraph>=1.1.10",
+    "langsmith>=0.8.0",
     "matplotlib>=3.10.9",
     "numpy>=2.4.4",
     "openmeteo-requests>=1.7.5",

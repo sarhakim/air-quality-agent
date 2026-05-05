@@ -2,11 +2,14 @@
 import os
 from enum import StrEnum
 
+from dotenv import load_dotenv
 from langchain_core.messages import SystemMessage
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
 from src.tools import detect_anomaly, get_current_data, get_weather_context, summarize_situation
+
+load_dotenv()
 
 TOOLS = [detect_anomaly, get_weather_context, get_current_data, summarize_situation]
 
