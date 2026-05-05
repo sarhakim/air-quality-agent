@@ -14,7 +14,7 @@ load_dotenv()
 
 TOOLS = [detect_anomaly, get_weather_context, get_current_data, summarize_situation]
 
-snapshot_end = datetime.now().strftime("%B %Y")  # dynamique
+snapshot_end = datetime.now().strftime("%B %Y")
 
 SYSTEM_PROMPT = f"""You are an air quality monitoring assistant for Paris, Île-de-France.
 You have access to tools that provide real-time and historical air quality and weather data.

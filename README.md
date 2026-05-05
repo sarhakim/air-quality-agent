@@ -7,7 +7,7 @@ and explains their meteorological causes using real-time and historical data.
 
 ```
 Open-Meteo AQI API ──┐
-                      ├──► ingestion.py ──► snapshot.csv ──► tools (×4) ──► LangGraph agent
+                      ├──► ingestion.py ──► snapshot.csv (optional) ──► tools (×4) ──► LangGraph agent
 Open-Meteo Archive ───┘                                                      Claude Haiku
 ```                                             
 
@@ -71,8 +71,6 @@ Results tracked on [LangSmith](https://smith.langchain.com/o/a3d7dfbe-9c58-48f5-
 - **Static snapshot**: data covers Feb–May 2026; regenerate snapshot for newer data
 - **Ozone detection**: daily AQI threshold misses hourly O3 peaks — `max_day` is reported but not used for anomaly classification
 - **Model dependency**: multi-step tool calling requires Claude Haiku or better — Llama 3.1 8B fails on sequential tool calls
-- **Judge variability**: LLM-as-judge without `temperature=0` introduces run-to-run noise (~±0.04)
-
 
 ## Data Sources
  
