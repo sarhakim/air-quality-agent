@@ -1,15 +1,17 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import json
 import os
+
 import ollama
 from langchain_core.messages import HumanMessage
-from ingestion import AirQualityIngestion
-from agent import app
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from src.agent import AgentModel, build_agent
 
+app = build_agent(model=AgentModel.HAIKU)
 
 class Evaluator:
     """Runs the full evaluation pipeline for the air quality agent."""
@@ -24,7 +26,7 @@ class Evaluator:
         results = [self._evaluate_case(case) for case in self.dataset]
 
         total = len(results)
-        print(f"\n=== EVALUATION SUMMARY ===")
+        print("\n=== EVALUATION SUMMARY ===")
         print(f"Total: {total} | Tools OK: {sum(r['tools_ok'] for r in results)}/{total} | Mention OK: {sum(r['mention_ok'] for r in results)}/{total} | Avg score: {sum(r['judge_score'] for r in results) / total:.2f}/5")
 
         self._save_results(results)

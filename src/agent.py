@@ -1,5 +1,8 @@
-from langchain_anthropic import ChatAnthropic
-from langchain_ollama import ChatOllama
+
+import os
+from enum import Enum
+
+from langchain_core.messages import SystemMessage
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
@@ -7,11 +10,6 @@ from src.tools import detect_anomaly, get_current_data, get_weather_context, sum
 
 TOOLS = [detect_anomaly, get_weather_context, get_current_data, summarize_situation]
 
-#llm = ChatAnthropic(model="claude-sonnet-4-20250514").bind_tools(TOOLS)
-#llm = ChatAnthropic(model="claude-haiku-4-5-20251001").bind_tools(TOOLS)
-llm = ChatOllama(model="llama3.1:8b").bind_tools(TOOLS)
-
-from langchain_core.messages import SystemMessage
 
 SYSTEM_PROMPT = """You are an air quality monitoring assistant for Paris, Île-de-France.
 You have access to tools that provide real-time and historical air quality and weather data.
@@ -37,29 +35,48 @@ Tool calling sequence for anomaly questions:
 3. Then provide your final answer
 """
 
-def agent(state: MessagesState) -> dict:
-    """Calls the LLM with the current state."""
-    messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
-    return {"messages": [llm.invoke(messages)]}
+class AgentModel(str, Enum):
+    """Supported LLM models for the agent."""
+    HAIKU = "claude-haiku-4-5-20251001"
+    SONNET = "claude-sonnet-4-20250514"
+    LLAMA = "llama3.1:8b"
 
 
-def should_continue(state: MessagesState) -> str:
-    """Routes to tools if the LLM called one, otherwise ends."""
-    last_message = state["messages"][-1]
-    if last_message.tool_calls:
-        return "tools"
-    return END
+def _build_llm(model: AgentModel):
+    """Instantiates the right LLM based on the model."""
+    if model == AgentModel.LLAMA:
+        from langchain_ollama import ChatOllama
+        return ChatOllama(model=model.value).bind_tools(TOOLS)
+    from langchain_anthropic import ChatAnthropic
+    return ChatAnthropic(model=model.value).bind_tools(TOOLS)
 
 
-# Build graph
-tool_node = ToolNode(TOOLS)
+def build_agent(model: AgentModel = AgentModel.HAIKU):
+    """Builds and returns the compiled LangGraph agent."""
+    if model != AgentModel.LLAMA and not os.environ.get("ANTHROPIC_API_KEY"):
+        raise OSError("ANTHROPIC_API_KEY is not set. Add it to your .env file.")
 
-graph = StateGraph(MessagesState)
-graph.add_node("agent", agent)
-graph.add_node("tools", tool_node)
+    llm = _build_llm(model)
 
-graph.add_edge(START, "agent")
-graph.add_conditional_edges("agent", should_continue)
-graph.add_edge("tools", "agent")
+    def agent(state: MessagesState) -> dict:
+        """Calls the LLM with the current state."""
+        messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
+        return {"messages": [llm.invoke(messages)]}
 
-app = graph.compile()
+    def should_continue(state: MessagesState) -> str:
+        """Routes to tools if the LLM called one, otherwise ends."""
+        if state["messages"][-1].tool_calls:
+            return "tools"
+        return END
+
+    graph = StateGraph(MessagesState)
+    graph.add_node("agent", agent)
+    graph.add_node("tools", ToolNode(TOOLS))
+    graph.add_edge(START, "agent")
+    graph.add_conditional_edges("agent", should_continue)
+    graph.add_edge("tools", "agent")
+
+    return graph.compile()
+
+
+app = build_agent()
