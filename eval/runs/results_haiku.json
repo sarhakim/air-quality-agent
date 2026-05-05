@@ -1,0 +1,252 @@
+[
+  {
+    "id": "en_dust_001",
+    "category": "anomaly_detection",
+    "question": "Was there an air quality anomaly in Paris on March 6, 2026?",
+    "agent_answer": "**Yes, there was an air quality anomaly in Paris on March 6, 2026.**\n\n**Key findings:**\n- **AQI:** Maximum of 62.3 (exceeded the threshold of 62.0)\n- **Main pollutant:** Dust (Saharan dust episode)\n  - Dust z-score: **5.57 standard deviations above the historical average** — this is an exceptionally high spike\n  - PM2.5: 28.08 μg/m³ (z-score: 1.98 standard deviations above average)\n\n**Weather context:**\n- Very low wind speeds (mean: 4.1 m/s, minimum: 1.2 m/s) allowed dust to accumulate rather than disperse\n- No precipitation (0 mm) — no rain to wash out the dust from the atmosphere\n- High humidity (79.9%) may have enhanced particle visibility and respiratory impact\n- Mild temperature (mean 12.4°C)\n\n**Explanation:** The anomaly was driven by a Saharan dust episode that arrived on a calm, dry day with minimal wind to disperse it. The lack of precipitation prevented natural washout of the particles, allowing dust concentrations to reach levels significantly above historical norms for this date.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 5,
+    "judge_reasoning": "The answer precisely matches the ground truth across all key metrics (z-scores, pollutants, weather factors), provides clear quantitative evidence, explains the causal mechanisms, and presents information in a well-organized manner with appropriate context.",
+    "tools_called": [
+      "detect_anomaly",
+      "get_weather_context"
+    ],
+    "expected_tools": [
+      "detect_anomaly",
+      "get_weather_context"
+    ]
+  },
+  {
+    "id": "en_current_001",
+    "category": "current_conditions",
+    "question": "What is the current air quality in Paris?",
+    "agent_answer": "**Current Air Quality in Paris** (May 5, 2026 at 10:00 UTC)\n\n**Air Quality Index:**\n- **European AQI: 20.3** — This is **GOOD** (well below the \"Moderate\" threshold of 50)\n\n**Pollutant Levels:**\n- PM2.5: 11.0 µg/m³ (Very low)\n- NO₂: 23.1 µg/m³ (Low)\n- O₃: 38.0 µg/m³ (Low)\n- Dust: 0.0 µg/m³ (No dust)\n\n**Weather Conditions:**\n- Temperature: 15°C\n- Wind speed: 10.2 m/s (Moderate, helps disperse pollutants)\n- Humidity: 85.6%\n- Light precipitation: 0.3 mm (Air washout effect)\n\n**Summary:** Air quality in Paris is excellent right now. All pollutants are well within healthy ranges, aided by moderate wind speeds and light rain that help cleanse the atmosphere. No health concerns for any population groups.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 2,
+    "judge_reasoning": "The answer provides specific numerical data with a future timestamp (May 5, 2026) that cannot be verified as current, fails to cite actual data sources, and presents fabricated measurements rather than retrieving real-time information from reliable air quality monitoring services.",
+    "tools_called": [
+      "get_current_data"
+    ],
+    "expected_tools": [
+      "get_current_data"
+    ]
+  },
+  {
+    "id": "en_normal_001",
+    "category": "anomaly_detection",
+    "question": "Was the air quality acceptable in Paris on April 1, 2026?",
+    "agent_answer": "Yes, **air quality was acceptable in Paris on April 1, 2026**. \n\nHere are the details:\n\n- **Maximum AQI: 40.3** (well below the acceptable threshold of 62)\n- **Mean AQI: 31.0** (good range)\n- **No anomaly detected** ✓\n\n**Pollutant levels:**\n- PM2.5: 20.33 µg/m³ (slightly above average, z-score: 1.04)\n- NO₂: 44.86 µg/m³ (near average, z-score: 0.98)\n- Dust: 0.0 µg/m³ (below average)\n- Ozone: 19.38 µg/m³ mean (below average, z-score: -1.18)\n\nThe air quality on that date was clearly acceptable, with no pollutants reaching concerning levels.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 5,
+    "judge_reasoning": "The answer correctly identifies acceptable air quality on April 1, 2026, with accurate AQI values, proper context about thresholds, detailed pollutant breakdowns with z-scores, and clear confirmation that no anomalies were detected, fully aligning with the ground truth.",
+    "tools_called": [
+      "detect_anomaly"
+    ],
+    "expected_tools": [
+      "detect_anomaly"
+    ]
+  },
+  {
+    "id": "en_out_of_range_001",
+    "category": "error_handling",
+    "question": "What was the air quality in Paris on January 1, 2026?",
+    "agent_answer": "I don't have data available for January 1, 2026. This is likely because that date is in the future or data hasn't been recorded yet.\n\nWould you like me to check:\n- A different date (in the past or recent)?\n- Current air quality conditions in Paris?\n- A summary of recent air quality trends?\n\nPlease provide a date in the past, and I'll be happy to help.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 5,
+    "judge_reasoning": "The agent correctly identified that January 1, 2026 is outside its data availability window, accurately explained why (future date/no recorded data), and helpfully offered alternative options to assist the user.",
+    "tools_called": [
+      "detect_anomaly"
+    ],
+    "expected_tools": [
+      "detect_anomaly"
+    ]
+  },
+  {
+    "id": "dust_001",
+    "category": "anomaly_detection",
+    "question": "Y a-t-il eu une anomalie de qualité de l'air à Paris le 6 mars 2026 ?",
+    "agent_answer": "**Oui, il y a eu une anomalie de qualité de l'air à Paris le 6 mars 2026.**\n\n**Résumé :**\n- **AQI maximum** : 62,3 (légèrement au-dessus du seuil de 62,0)\n- **Polluant principal** : **Poussière (Sahara)**\n- **Autres polluants élevés** : PM2.5 (particules fines)\n\n**Détail des polluants :**\n- **Poussière** : 1,98 standard déviations au-dessus de la moyenne historique (très élevé)\n- **PM2.5** : 5,57 standard déviations au-dessus de la moyenne (extrêmement élevé - signature typique d'un épisode de poussière saharienne)\n- **NO₂** : 1,45 standard déviations au-dessus de la moyenne\n\n**Contexte météorologique :**\nLa faible vitesse moyenne du vent (4,1 m/s) et l'absence de précipitations ont favorisé la stagnation et l'accumulation des poussières sahariennes dans l'atmosphère parisienne. Les poussières n'ont pas pu être dispersées ou lessivées par la pluie.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 4,
+    "judge_reasoning": "The answer correctly identifies the Saharan dust episode and meteorological factors, but inverts the z-scores for dust (1.98) and PM2.5 (5.57) compared to ground truth, and mischaracterizes it as primarily dust-driven rather than a mixed episode where PM2.5 is the dominant anomaly.",
+    "tools_called": [
+      "detect_anomaly",
+      "get_weather_context"
+    ],
+    "expected_tools": [
+      "detect_anomaly",
+      "get_weather_context"
+    ]
+  },
+  {
+    "id": "dust_002",
+    "category": "anomaly_detection",
+    "question": "Qu'est-ce qui a causé la mauvaise qualité de l'air à Paris le 8 mars 2026 ?",
+    "agent_answer": "**Le 8 mars 2026, la mauvaise qualité de l'air à Paris a été causée par une combinaison de facteurs :**\n\n**Polluants responsables :**\n- **PM2.5 (particules fines)** : 40,31 µg/m³ — le principal responsable, avec une concentration **3,45 écarts-types au-dessus de la moyenne historique**\n- **Poussière** : 10,42 µg/m³ — également élevée avec **2,35 écarts-types au-dessus de la normale** (probablement une contribution saharienne)\n- **NO₂ (dioxyde d'azote)** : 50,81 µg/m³ — modérément élevé\n\n**Contexte météorologique favorable à la stagnation :**\n- **Vent très faible** (3,1 m/s en moyenne, minimum 1,7 m/s) — conditions anticycloniques qui empêchent la dispersion des polluants\n- **Pas de précipitations** (0,0 mm) — pas de \"lavage\" de l'air\n- **Humidité très élevée** (87,6%) — favorise la formation de brume et la stagnation des polluants\n- Température douce (10,8°C)\n\n**Résumé :** La mauvaise qualité de l'air résulte d'une **stagnation des polluants due aux conditions anticycloniques** (vent très faible) combinée à une **contribution de poussière saharienne** et aux émissions urbaines (NO₂), sans aucun phénomène de dispersion (pas de pluie, pas de vent).",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 5,
+    "judge_reasoning": "The agent's answer accurately identifies all key factors from the ground truth (Saharan dust peak, elevated PM2.5, anticyclonic conditions, weak wind) with detailed supporting data and meteorological context, presenting a comprehensive and well-structured explanation that exceeds the ground truth's brevity while maintaining factual alignment.",
+    "tools_called": [
+      "detect_anomaly",
+      "get_weather_context"
+    ],
+    "expected_tools": [
+      "detect_anomaly",
+      "get_weather_context"
+    ]
+  },
+  {
+    "id": "pm10_001",
+    "category": "anomaly_detection",
+    "question": "Y a-t-il eu une anomalie de qualité de l'air à Paris le 21 mars 2026 ?",
+    "agent_answer": "**Oui, il y a eu une anomalie de qualité de l'air à Paris le 21 mars 2026.**\n\n**Résumé de l'anomalie :**\n- **AQI moyen** : 63,7 (maximum : 66,2) — au-dessus du seuil d'anomalie de 62,0\n- **Polluant principal** : **PM2.5** (particules fines)\n- **Écart statistique** : Les PM2.5 ont atteint 32,06 µg/m³ en moyenne, soit **2,46 écarts-types au-dessus de la moyenne historique** — une concentration significativement élevée\n\n**Contexte météorologique :**\n- **Vent faible** : 7,6 m/s en moyenne (minimum : 5,7 m/s) — les conditions éoliennes réduites ont limité la dispersion des polluants\n- **Pas de précipitations** : Aucune pluie pour nettoyer l'air\n- **Humidité modérée** : 71,5 % en moyenne\n- **Température douce** : 10,2°C en moyenne\n\n**Cause probable :** La stagnation des polluants due aux vents faibles, combinée à l'absence de précipitations, a permis l'accumulation de particules fines dans l'atmosphère parisienne le 21 mars 2026.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 4,
+    "judge_reasoning": "The assistant correctly identified a fine particle pollution episode on March 21, 2026, with accurate AQI data, PM2.5 as the main pollutant, and meteorological context explaining the stagnation; the answer appropriately does not mention Saharan dust as a significant factor, aligning with the ground truth.",
+    "tools_called": [
+      "detect_anomaly",
+      "get_weather_context"
+    ],
+    "expected_tools": [
+      "detect_anomaly",
+      "get_weather_context"
+    ]
+  },
+  {
+    "id": "normal_001",
+    "category": "anomaly_detection",
+    "question": "La qualité de l'air était-elle normale à Paris le 1er avril 2026 ?",
+    "agent_answer": "Oui, la qualité de l'air était **normale** à Paris le 1er avril 2026.\n\n**Résumé :**\n- **Indice AQI moyen** : 31,0 (bien en dessous du seuil de 62)\n- **AQI maximal** : 40,3\n- **Anomalie détectée** : Non\n\nLes niveaux de polluants étaient dans les normes :\n- **PM2.5** : 20,33 µg/m³ (z-score : 1,04) — pratiquement à la normale\n- **NO₂** : 44,86 ppb — légèrement en dessous de la moyenne\n- **O₃** : 19,38 ppb — légèrement en dessous de la moyenne\n- **Poussière** : 0,0 µg/m³ — absente\n\nIl n'y avait aucun problème de qualité de l'air cette journée-là.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 5,
+    "judge_reasoning": "The assistant's answer accurately confirms normal air quality with well-supported data (AQI values, pollutant levels, z-scores) that align with the ground truth, while providing clear and comprehensive documentation of all relevant metrics.",
+    "tools_called": [
+      "detect_anomaly"
+    ],
+    "expected_tools": [
+      "detect_anomaly"
+    ]
+  },
+  {
+    "id": "normal_002",
+    "category": "anomaly_detection",
+    "question": "La qualité de l'air était-elle acceptable à Paris le 10 février 2026 ?",
+    "agent_answer": "Oui, la qualité de l'air était **acceptable** à Paris le 10 février 2026.\n\nVoici les détails :\n\n**Indice de qualité de l'air (AQI) :**\n- AQI moyen : **20,6**\n- AQI maximal : **27,7**\n- Seuil d'acceptabilité : 62,0\n\nLes niveaux enregistrés sont bien en dessous du seuil d'acceptabilité.\n\n**Polluants mesurés :**\n- **PM2.5** : 4,86 µg/m³ (0,83 écart-type *en dessous* de la moyenne historique)\n- **NO₂** : 25,27 ppb (légèrement en dessous de la moyenne)\n- **Poussière** : 0,0 µg/m³ (pas d'activité détectée)\n- **Ozone** : 39,58 ppb (en dessous de la moyenne)\n\nAucune anomalie n'a été détectée ce jour-là. Les conditions étaient bonnes pour la qualité de l'air à Paris.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 5,
+    "judge_reasoning": "The assistant's answer accurately confirms acceptable air quality on February 10, 2026 in Paris with appropriate AQI values, detailed pollutant measurements, and clear comparison to acceptability thresholds, aligning perfectly with the ground truth of a normal day with AQI below anomaly threshold.",
+    "tools_called": [
+      "detect_anomaly"
+    ],
+    "expected_tools": [
+      "detect_anomaly"
+    ]
+  },
+  {
+    "id": "current_001",
+    "category": "current_conditions",
+    "question": "Quelle est la qualité de l'air à Paris en ce moment ?",
+    "agent_answer": "Voici l'état actuel de la qualité de l'air à Paris (5 mai 2026, 10h00) :\n\n**Qualité générale :** ✅ **Très bonne**\n- **Indice AQI européen** : 20,3 (seuil \"bon\" < 50)\n\n**Polluants mesurés :**\n- PM2.5 (particules fines) : 11,0 µg/m³ (très bas)\n- NO₂ (dioxyde d'azote) : 23,1 µg/m³ (modéré)\n- O₃ (ozone) : 38,0 µg/m³ (bas)\n- Poussière (Sahara) : 0,0 µg/m³ (absent)\n\n**Conditions météorologiques :**\n- Température : 15°C\n- Vitesse du vent : 10,2 m/s (vent modéré à assez bon pour la dispersion)\n- Précipitations : 0,3 mm (légères pluies)\n- Humidité : 85,6%\n\n**Résumé :** Les conditions sont très favorables. Le vent modéré et la présence de pluie légère contribuent à une bonne dispersion et un nettoyage de l'atmosphère. Aucune pollution anormale détectée.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 1,
+    "judge_reasoning": "The assistant provides a fabricated response with specific data from May 5, 2026 (a future date), which is impossible to verify and likely entirely invented; it should have stated it cannot access real-time air quality data and lacks current internet connectivity to provide actual measurements.",
+    "tools_called": [
+      "get_current_data"
+    ],
+    "expected_tools": [
+      "get_current_data"
+    ]
+  },
+  {
+    "id": "summary_001",
+    "category": "summary",
+    "question": "Combien d'anomalies de qualité de l'air y a-t-il eu à Paris ces 30 derniers jours ?",
+    "agent_answer": "Sur les **30 derniers jours**, il n'y a eu **aucune anomalie** de qualité de l'air à Paris.\n\nVoici le résumé de la situation :\n- **Nombre d'anomalies** : 0\n- **AQI moyen** : 39,9 (qualité de l'air bonne)\n- **AQI maximum** : 52,0 (le 9 avril 2026 - toujours bon)\n- **Seuil d'anomalie** : 62,0 (seuil européen dépassé)\n\nLa qualité de l'air a été globalement **stable et bonne** au cours de cette période, sans dépassements significatifs des normes européennes.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 4,
+    "judge_reasoning": "The answer accurately reports zero anomalies with supporting data (AQI metrics and threshold comparison), presents information clearly with good formatting, but lacks detail on the specific methodology used to count anomalies or the day-by-day breakdown that might be implied by 'comptage des jours anomaux' in the ground truth.",
+    "tools_called": [
+      "summarize_situation"
+    ],
+    "expected_tools": [
+      "summarize_situation"
+    ]
+  },
+  {
+    "id": "weather_001",
+    "category": "weather_context",
+    "question": "Quel était le contexte météorologique lors de l'anomalie du 6 mars 2026 ?",
+    "agent_answer": "## Contexte météorologique de l'anomalie du 6 mars 2026\n\nLe 6 mars 2026, une **anomalie de qualité de l'air** a été détectée avec un **AQI moyen de 58,5** (dépassant le seuil de 62,0), causée principalement par une **épisode de poussière désertique**.\n\n**Conditions météorologiques :**\n- **Température** : 12,4 °C en moyenne (max : 17,5 °C)\n- **Vents faibles** : 4,1 m/s en moyenne (minimum : 1,2 m/s)\n- **Aucune précipitation** : 0 mm\n- **Humidité élevée** : 79,9%\n\n**Analyse :**\n\nCes conditions météorologiques sont **typiques d'un épisode de poussière saharienne** :\n- La poussière a atteint **5,57 écarts-types** au-dessus de la moyenne historique\n- Les **vents faibles** (4,1 m/s) n'ont pas pu disperser efficacement les particules\n- **L'absence de précipitation** a empêché le lessivage atmosphérique\n- L'**humidité élevée** peut augmenter la visibilité réduite des aérosols désertiques\n\nLa PM2.5 était également légèrement élevée (1,98 écarts-types), confirmant l'intrusion de particules fines liées à cet épisode.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 3,
+    "judge_reasoning": "The answer contains a critical unit error (wind speed stated as 4.1 m/s instead of 4.1 km/h as per ground truth), mischaracterizes the phenomenon as Saharan dust without evidence, and overinterprets the data, though it does capture all relevant meteorological parameters and correctly identifies stagnation conditions.",
+    "tools_called": [
+      "detect_anomaly",
+      "get_weather_context"
+    ],
+    "expected_tools": [
+      "get_weather_context"
+    ]
+  },
+  {
+    "id": "ozone_001",
+    "category": "anomaly_detection",
+    "question": "La qualité de l'air était-elle bonne à Paris le 9 avril 2026 ?",
+    "agent_answer": "Oui, la qualité de l'air était **bonne** à Paris le 9 avril 2026. Voici les détails :\n\n**Indices de qualité (AQI) :**\n- AQI moyen : **35,1**\n- AQI maximal : **52,0**\n- Seuil d'alerte : 62,0\n- **Pas d'anomalie détectée**\n\n**Principaux polluants (tous normaux) :**\n- **PM2.5** : 16,06 µg/m³ (légèrement au-dessus de la moyenne)\n- **NO₂** : 31,02 µg/m³\n- **Poussières** : 1,79 µg/m³\n- **Ozone** : 55,62 µg/m³ en moyenne\n\nTous les polluants étaient dans des niveaux habituels pour cette période, avec des z-scores très proches de zéro. La qualité de l'air était donc tout à fait satisfaisante ce jour-là.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 2,
+    "judge_reasoning": "The agent incorrectly reported ozone at 55.62 µg/m³ when the actual value was 118 µg/m³, leading to a false 'good' quality assessment; the answer missed critical information that air quality was actually 'poor' according to EEA standards, and failed to disclose known detector limitations.",
+    "tools_called": [
+      "detect_anomaly"
+    ],
+    "expected_tools": [
+      "detect_anomaly"
+    ]
+  },
+  {
+    "id": "ozone_002",
+    "category": "weather_context",
+    "question": "Y avait-il beaucoup d'ozone à Paris le 9 avril 2026 ?",
+    "agent_answer": "Non, **il n'y avait pas beaucoup d'ozone à Paris le 9 avril 2026**. \n\nVoici les données :\n\n- **Ozone (O₃)** : moyenne de 55,6 µg/m³ avec un pic horaire de 118 µg/m³\n  - Z-score : 0,14 (légèrement en dessous de la moyenne historique)\n  \n- **AQI maximal du jour** : 52 (bien en dessous du seuil d'anomalie de 62)\n\nL'ozone était donc **dans les niveaux normaux** pour cette date. Bien que le pic horaire ait atteint 118 µg/m³, cela reste modéré. C'est les **particules fines (PM2.5)** qui étaient le principal polluant ce jour-là, avec une moyenne de 16,06 µg/m³.",
+    "tools_ok": false,
+    "mention_ok": true,
+    "judge_score": 2,
+    "judge_reasoning": "The assistant's answer contradicts the ground truth by characterizing ozone levels as 'normal' and 'not much,' when the peak of 118 µg/m³ actually represents a historical maximum; the answer also fails to mention the critical contextual factor of high temperature (25.8°C) driving photochemical ozone formation, and misrepresents the daily AQI while downplaying the ozone concentration.",
+    "tools_called": [
+      "detect_anomaly"
+    ],
+    "expected_tools": [
+      "detect_anomaly",
+      "get_weather_context"
+    ]
+  },
+  {
+    "id": "out_of_range_001",
+    "category": "error_handling",
+    "question": "Quelle était la qualité de l'air à Paris le 1er janvier 2026 ?",
+    "agent_answer": "Il n'y a pas de données disponibles pour le 1er janvier 2026. Cela pourrait être parce que :\n- Cette date est dans le futur et les données ne sont pas encore collectées\n- Les données historiques ne couvrent que les périodes passées\n\nPourriez-vous vérifier la date ? Je peux vous fournir des informations sur la qualité de l'air à Paris pour une date antérieure ou actuelle si vous le souhaitez.",
+    "tools_ok": true,
+    "mention_ok": true,
+    "judge_score": 5,
+    "judge_reasoning": "L'agent identifie correctement que la date est hors de portée des données disponibles, explique les raisons plausibles, et propose une alternative constructive en accord avec le ground truth.",
+    "tools_called": [
+      "detect_anomaly"
+    ],
+    "expected_tools": [
+      "detect_anomaly"
+    ]
+  }
+]

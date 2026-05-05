@@ -44,13 +44,24 @@ def detect_anomaly(date: str) -> dict:
 
     # Identify the main pollutant using z-scores
     pollutants = {}
-    for col in ["pm2_5", "no2", "o3", "dust"]:
+    for col in ["pm2_5", "no2", "dust"]:
         day_mean = df_day[col].mean()
         z_score = (day_mean - df[col].mean()) / df[col].std()
         pollutants[col] = {
             "mean_day": round(float(day_mean), 2),
             "z_score": round(float(z_score), 2)
         }
+
+    # O3 — use both mean and max (photochemical cycle causes high hourly peaks)
+    o3_mean = df_day["o3"].mean()
+    o3_max = df_day["o3"].max()
+    o3_z_score = (o3_mean - df["o3"].mean()) / df["o3"].std()
+    pollutants["o3"] = {
+        "mean_day": round(float(o3_mean), 2),
+        "max_day": round(float(o3_max), 2),
+        "z_score": round(float(o3_z_score), 2),
+        "warning": "O3 peaks hourly — max may exceed mean significantly" if o3_max > 80 else None,
+    }
 
     main_pollutant = max(pollutants, key=lambda x: pollutants[x]["z_score"])
 

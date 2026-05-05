@@ -1,25 +1,32 @@
 from dotenv import load_dotenv
 
+from eval.config import BASE_DIR, DATASET_PATH
+
 load_dotenv()
 
 import json
 import os
 
-import ollama
+#import ollama
+from anthropic import Anthropic
 from langchain_core.messages import HumanMessage
 
 from src.agent import AgentModel, build_agent
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 class Evaluator:
     """Runs the full evaluation pipeline for the air quality agent."""
-
-    def __init__(self, dataset_path: str | None = None, model: AgentModel = AgentModel.HAIKU):
-        self.agent_app = build_agent(model=model)
-        self.dataset_path = dataset_path or os.path.join(BASE_DIR, "eval", "eval_dataset.json")
-        self.output_path = os.path.join(BASE_DIR, "eval", "results.json")
+    def __init__(
+        self,
+        dataset_path: str | None = None,
+        agent_model: AgentModel = AgentModel.HAIKU,
+        output_name: str = "results",
+    ):
+        self.agent_app = build_agent(model=agent_model)
+        self.dataset_path = dataset_path or DATASET_PATH
+        runs_dir = os.path.join(BASE_DIR, "eval", "runs")
+        os.makedirs(runs_dir, exist_ok=True)
+        self.output_path = os.path.join(runs_dir, f"results_{output_name}.json")
         self.dataset = self._load_dataset()
 
     def run(self) -> list[dict]:
@@ -90,23 +97,34 @@ class Evaluator:
         return {"answer": final_answer, "tools_called": tools_called}
 
     def _llm_as_judge(self, question: str, answer: str, ground_truth: str) -> dict:
-        """Uses llama to judge the quality of the agent's answer."""
-        prompt = f"""You are evaluating the quality of an AI assistant's answer about air quality in Paris.
-            Question: {question}
-            Agent's answer: {answer}
-            Ground truth: {ground_truth}
+        """Uses llm to judge the quality of the agent's answer."""
+        prompt = """You are evaluating the quality of an AI assistant's answer about air quality in Paris.
 
-            Evaluate on: factual accuracy, completeness, clarity.
-            Respond ONLY with this JSON:
-            {{
-                "score": <1-5>,
-                "factual_accuracy": <true/false>,
-                "completeness": <true/false>,
-                "reasoning": "<one sentence>"
-            }}"""
+        Question: {question}
+        Agent's answer: {answer}
+        Ground truth: {ground_truth}
 
-        response = ollama.chat(model="llama3.1:8b", messages=[{"role": "user", "content": prompt}])
-        raw = response["message"]["content"].strip()
+        Evaluate on: factual accuracy, completeness, clarity.
+        Respond with this JSON:
+        {{
+            "score": <1-5>,
+            "factual_accuracy": <true/false>,
+            "completeness": <true/false>,
+            "reasoning": "<one sentence>"
+        }}""".format(question=question, answer=answer, ground_truth=ground_truth)
+
+        #response = ollama.chat(model="llama3.1:8b", messages=[{"role": "user", "content": prompt}])
+        #raw = response["message"]["content"].strip()
+
+        response = Anthropic().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=256,
+            messages=[
+                {"role": "user", "content": prompt},
+                {"role": "assistant", "content": "{"},
+            ],
+        )
+        raw = "{" + response.content[0].text.strip()
         try:
             return json.loads(raw)
         except json.JSONDecodeError:
@@ -130,4 +148,4 @@ class Evaluator:
         df.to_csv(self.output_path.replace(".json", ".csv"), index=False)
 
 if __name__ == "__main__":
-    Evaluator(model=AgentModel.LLAMA).run()
+    Evaluator(agent_model=AgentModel.LLAMA).run()

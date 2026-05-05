@@ -31,7 +31,7 @@
                 "quality"
             ]
         },
-        "ground_truth": "Returns latest available measurements."
+        "ground_truth": "Returns latest available measurements. Expected: AQI, PM2.5, NO2, O3, dust, temperature, wind. A May 2026 timestamp is correct — current date is May 2026, not a future date."
     },
     {
         "id": "en_normal_001",
@@ -162,7 +162,7 @@
                 "qualité"
             ]
         },
-        "ground_truth": "Retourne les dernières mesures disponibles."
+        "ground_truth": "Retourne les dernières mesures disponibles. Attendu : AQI, PM2.5, NO2, O3, dust, température, vent. Une date de mai 2026 est correcte — nous sommes en mai 2026, pas dans le futur."
     },
     {
         "id": "summary_001",
@@ -193,7 +193,7 @@
                 "humidité"
             ]
         },
-        "ground_truth": "Vent faible (4.1 km/h), pas de précipitations, humidité élevée (79.9%) — conditions anticycloniques favorisant la stagnation."
+        "ground_truth": "Vent faible (4.1 km/h), pas de précipitations, humidité élevée (79.9%) — conditions anticycloniques favorisant la stagnation. Note : wind_speed est en km/h dans les données."
     },
     {
         "id": "ozone_001",
@@ -209,7 +209,7 @@
                 "o3"
             ]
         },
-        "ground_truth": "AQI sous le seuil d'anomalie (52 vs 61.7) mais O3 à 118 µg/m³ — zone poor selon EEA. Limitation connue du détecteur."
+        "ground_truth": "AQI sous le seuil d'anomalie (52 vs 61.7). O3 max journalier à 118 µg/m³, proche du seuil EEA de 120 µg/m³ (MDA8). Limitation connue : le détecteur utilise la moyenne journalière et ne capte pas les pics horaires."
     },
     {
         "id": "ozone_002",
@@ -226,7 +226,7 @@
                 "chaleur"
             ]
         },
-        "ground_truth": "O3 à 118 µg/m³ (max historique), température 25.8°C — formation d'ozone par photochimie sous forte chaleur printanière."
+        "ground_truth": "O3 max journalier à 118 µg/m³ (proche du seuil EEA de 120 µg/m³), température max 25.8°C — formation d'ozone par photochimie sous forte chaleur printanière."
     },
     {
         "id": "out_of_range_001",
