@@ -43,13 +43,17 @@ class LangSmithEvaluator(BaseEvaluator):
         score = int(all(t in tools_called for t in expected_tools))
         return EvaluationResult(key="tools_ok", score=score)
 
-    def _judge_evaluator(self, run, example) -> EvaluationResult:
+    def _judge_evaluator(self, run, example) -> list[EvaluationResult]:
         """LLM-as-judge evaluator."""
         question = example.inputs.get("inputs_1", "")
         answer = run.outputs.get("output", "")
         ground_truth = example.outputs.get("outputs_1", "")
         result = self._llm_as_judge(question, answer, ground_truth)
-        return EvaluationResult(key="judge_score", score=result["score"])
+        
+        return [
+            EvaluationResult(key="judge_score", score=result["score"]),
+            EvaluationResult(key="judge_reasoning", score=None, comment=result["reasoning"]),
+        ]
 
 
 if __name__ == "__main__":

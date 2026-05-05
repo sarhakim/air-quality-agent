@@ -19,11 +19,23 @@ def _load_data() -> pd.DataFrame:
 @tool
 def detect_anomaly(date: str) -> dict:
     """
-    Detects whether air quality in Paris is anomalous on a given date.
-    Returns the AQI level, whether it is an anomaly, and the main pollutant responsible.
+    Detects whether air quality in Paris was anomalous on a specific past date.
+    Returns AQI levels, anomaly verdict, and z-scores per pollutant.
+
+    Use this tool for:
+    - Questions about a specific past date ("was the air quality bad on March 6?")
+    - Detecting pollution episodes or anomalies on a given day
+    - Identifying which pollutant caused an anomaly
+
+    Do NOT use for current conditions — use get_current_data instead.
+    If is_anomaly is true, always follow up with get_weather_context for the same date.
+
+    Note: O3 returns both mean_day and max_day — always report max_day as ozone
+    peaks hourly due to photochemical cycles. If max_day > 100 µg/m³, mention it
+    is approaching the EEA threshold of 120 µg/m³.
 
     Args:
-        date: date in YYYY-MM-DD format.
+        date: date in YYYY-MM-DD format. Must be within the data window (Feb-May 2026).
     """
     df = _load_data()
 
@@ -78,9 +90,20 @@ def detect_anomaly(date: str) -> dict:
 @tool
 def get_weather_context(date: str) -> dict:
     """
-    Returns weather conditions in Paris for a given date.
-    Useful to contextualize air quality anomalies (low wind = pollution stagnation, 
-    rain = air washout, high temperature = ozone formation).
+    Returns meteorological conditions in Paris for a given past date.
+    Use to explain why a pollution anomaly occurred.
+
+    Use this tool:
+    - Always after detect_anomaly returns is_anomaly=true
+    - For questions about wind, rain, temperature on a specific day
+    - To explain stagnation (low wind), air washout (precipitation), or ozone formation (high temperature)
+
+    Key interpretations:
+    - wind_speed_mean < 5 km/h → stagnation, pollutants accumulate
+    - precipitation_total > 0 → air washout effect
+    - temperature_max > 20°C → favors ozone formation
+
+    Note: wind_speed is in km/h.
 
     Args:
         date: date in YYYY-MM-DD format.
@@ -108,7 +131,16 @@ def get_weather_context(date: str) -> dict:
 def get_current_data() -> dict:
     """
     Returns the latest available air quality and weather measurements for Paris.
-    Useful to answer questions about current conditions.
+
+    Use this tool for:
+    - Questions about current or present conditions ("what is the air quality now?")
+    - Questions using words like "currently", "right now", "today", "at the moment"
+
+    Important: data may be up to 12 hours old due to CAMS model update frequency.
+    Always mention this delay when reporting current conditions.
+    The datetime field may show a timestamp from today or yesterday — this is normal.
+
+    Do NOT use for questions about specific past dates — use detect_anomaly instead.
     """
     df = _load_data()
     now = datetime.now(UTC)
@@ -132,10 +164,15 @@ def get_current_data() -> dict:
 def summarize_situation(days: int = 7) -> dict:
     """
     Summarizes air quality in Paris over the last N days.
-    Returns anomaly count, worst days, and overall AQI trend.
+    Returns anomaly count, worst days, and overall AQI statistics.
+
+    Use this tool for:
+    - Questions about recent trends ("how has the air quality been lately?")
+    - Counting anomalies over a period ("how many bad days in the last 30 days?")
+    - Getting an overview without a specific date
 
     Args:
-        days: number of past days to summarize (default: 7).
+        days: number of past days to summarize (default: 7, max: 90).
     """
     df = _load_data()
 
