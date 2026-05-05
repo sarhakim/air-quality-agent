@@ -12,3 +12,6 @@ wheels/
 
 .cache.sqlite
 .env
+*.csv
+.ruff_cache
+.pytest_cache

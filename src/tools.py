@@ -1,13 +1,18 @@
-from datetime import datetime, timezone
+import os
+from datetime import UTC, datetime
 
 import pandas as pd
 from langchain_core.tools import tool
 
 from src.ingestion import AirQualityIngestion
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SNAPSHOT_PATH = os.path.join(BASE_DIR, "data", "air_quality_snapshot.csv")
 
 def _load_data() -> pd.DataFrame:
-    """Loads air quality and weather data."""
+    """Loads air quality data from snapshot if available, otherwise fetches from API."""
+    if os.path.exists(SNAPSHOT_PATH):
+        return pd.read_csv(SNAPSHOT_PATH, parse_dates=["date"])
     return AirQualityIngestion(past_days=90).fetch_all()
 
 
@@ -95,7 +100,7 @@ def get_current_data() -> dict:
     Useful to answer questions about current conditions.
     """
     df = _load_data()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     df_past = df[df["date"] <= now].dropna()
     latest = df_past.iloc[-1]
 

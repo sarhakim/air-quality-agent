@@ -1,0 +1,247 @@
+[
+    {
+        "id": "en_dust_001",
+        "question": "Was there an air quality anomaly in Paris on March 6, 2026?",
+        "category": "anomaly_detection",
+        "expected": {
+            "is_anomaly": true,
+            "main_pollutant": "dust",
+            "tools_called": [
+                "detect_anomaly",
+                "get_weather_context"
+            ],
+            "must_mention": [
+                "dust",
+                "wind",
+                "saharan"
+            ]
+        },
+        "ground_truth": "Saharan dust episode (z=5.57) + elevated PM2.5 (z=1.98), amplified by low wind and no precipitation."
+    },
+    {
+        "id": "en_current_001",
+        "question": "What is the current air quality in Paris?",
+        "category": "current_conditions",
+        "expected": {
+            "tools_called": [
+                "get_current_data"
+            ],
+            "must_mention": [
+                "aqi",
+                "quality"
+            ]
+        },
+        "ground_truth": "Returns latest available measurements."
+    },
+    {
+        "id": "en_normal_001",
+        "question": "Was the air quality acceptable in Paris on April 1, 2026?",
+        "category": "anomaly_detection",
+        "expected": {
+            "is_anomaly": false,
+            "tools_called": [
+                "detect_anomaly"
+            ]
+        },
+        "ground_truth": "Normal day, AQI below anomaly threshold."
+    },
+    {
+        "id": "en_out_of_range_001",
+        "question": "What was the air quality in Paris on January 1, 2026?",
+        "category": "error_handling",
+        "expected": {
+            "tools_called": [
+                "detect_anomaly"
+            ],
+            "must_mention": [
+                "data",
+                "available",
+                "unavailable"
+            ]
+        },
+        "ground_truth": "Date outside snapshot window — agent should report data unavailable."
+    },
+    {
+        "id": "dust_001",
+        "question": "Y a-t-il eu une anomalie de qualité de l'air à Paris le 6 mars 2026 ?",
+        "category": "anomaly_detection",
+        "expected": {
+            "is_anomaly": true,
+            "main_pollutant": "dust",
+            "tools_called": [
+                "detect_anomaly",
+                "get_weather_context"
+            ],
+            "must_mention": [
+                "dust",
+                "vent",
+                "saharien"
+            ]
+        },
+        "ground_truth": "Épisode mixte : dust saharien (z=5.57) + PM2.5 élevé (z=1.98), amplifié par vent faible et absence de précipitations."
+    },
+    {
+        "id": "dust_002",
+        "question": "Qu'est-ce qui a causé la mauvaise qualité de l'air à Paris le 8 mars 2026 ?",
+        "category": "anomaly_detection",
+        "expected": {
+            "is_anomaly": true,
+            "tools_called": [
+                "detect_anomaly",
+                "get_weather_context"
+            ],
+            "must_mention": [
+                "dust",
+                "particules",
+                "vent"
+            ]
+        },
+        "ground_truth": "Pic du dust saharien + PM2.5 élevé, conditions anticycloniques avec vent faible."
+    },
+    {
+        "id": "pm10_001",
+        "question": "Y a-t-il eu une anomalie de qualité de l'air à Paris le 21 mars 2026 ?",
+        "category": "anomaly_detection",
+        "expected": {
+            "is_anomaly": true,
+            "tools_called": [
+                "detect_anomaly",
+                "get_weather_context"
+            ],
+            "must_mention": [
+                "particules",
+                "pm"
+            ]
+        },
+        "ground_truth": "Épisode de pollution aux particules fines, pas de dust saharien significatif."
+    },
+    {
+        "id": "normal_001",
+        "question": "La qualité de l'air était-elle normale à Paris le 1er avril 2026 ?",
+        "category": "anomaly_detection",
+        "expected": {
+            "is_anomaly": false,
+            "tools_called": [
+                "detect_anomaly"
+            ],
+            "must_mention": [
+                "normale",
+                "normal",
+                "bonne"
+            ]
+        },
+        "ground_truth": "Jour normal, AQI en dessous du seuil d'anomalie."
+    },
+    {
+        "id": "normal_002",
+        "question": "La qualité de l'air était-elle acceptable à Paris le 10 février 2026 ?",
+        "category": "anomaly_detection",
+        "expected": {
+            "is_anomaly": false,
+            "tools_called": [
+                "detect_anomaly"
+            ],
+            "must_mention": [
+                "normale",
+                "normal",
+                "bonne"
+            ]
+        },
+        "ground_truth": "Jour normal, AQI en dessous du seuil d'anomalie."
+    },
+    {
+        "id": "current_001",
+        "question": "Quelle est la qualité de l'air à Paris en ce moment ?",
+        "category": "current_conditions",
+        "expected": {
+            "tools_called": [
+                "get_current_data"
+            ],
+            "must_mention": [
+                "aqi",
+                "qualité"
+            ]
+        },
+        "ground_truth": "Retourne les dernières mesures disponibles."
+    },
+    {
+        "id": "summary_001",
+        "question": "Combien d'anomalies de qualité de l'air y a-t-il eu à Paris ces 30 derniers jours ?",
+        "category": "summary",
+        "expected": {
+            "tools_called": [
+                "summarize_situation"
+            ],
+            "must_mention": [
+                "anomalie",
+                "jours"
+            ]
+        },
+        "ground_truth": "Résumé sur 30 jours avec comptage des jours anomaux."
+    },
+    {
+        "id": "weather_001",
+        "question": "Quel était le contexte météorologique lors de l'anomalie du 6 mars 2026 ?",
+        "category": "weather_context",
+        "expected": {
+            "tools_called": [
+                "get_weather_context"
+            ],
+            "must_mention": [
+                "vent",
+                "précipitation",
+                "humidité"
+            ]
+        },
+        "ground_truth": "Vent faible (4.1 km/h), pas de précipitations, humidité élevée (79.9%) — conditions anticycloniques favorisant la stagnation."
+    },
+    {
+        "id": "ozone_001",
+        "question": "La qualité de l'air était-elle bonne à Paris le 9 avril 2026 ?",
+        "category": "anomaly_detection",
+        "expected": {
+            "is_anomaly": false,
+            "tools_called": [
+                "detect_anomaly"
+            ],
+            "must_mention": [
+                "ozone",
+                "o3"
+            ]
+        },
+        "ground_truth": "AQI sous le seuil d'anomalie (52 vs 61.7) mais O3 à 118 µg/m³ — zone poor selon EEA. Limitation connue du détecteur."
+    },
+    {
+        "id": "ozone_002",
+        "question": "Y avait-il beaucoup d'ozone à Paris le 9 avril 2026 ?",
+        "category": "weather_context",
+        "expected": {
+            "tools_called": [
+                "detect_anomaly",
+                "get_weather_context"
+            ],
+            "must_mention": [
+                "ozone",
+                "température",
+                "chaleur"
+            ]
+        },
+        "ground_truth": "O3 à 118 µg/m³ (max historique), température 25.8°C — formation d'ozone par photochimie sous forte chaleur printanière."
+    },
+    {
+        "id": "out_of_range_001",
+        "question": "Quelle était la qualité de l'air à Paris le 1er janvier 2026 ?",
+        "category": "error_handling",
+        "expected": {
+            "tools_called": [
+                "detect_anomaly"
+            ],
+            "must_mention": [
+                "données",
+                "disponible",
+                "indisponible"
+            ]
+        },
+        "ground_truth": "Date hors de la fenêtre du snapshot — l'agent doit signaler que les données ne sont pas disponibles."
+    }
+]

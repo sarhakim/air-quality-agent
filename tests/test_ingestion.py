@@ -1,13 +1,14 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-from unittest.mock import patch, MagicMock
+
 from ingestion import AirQualityIngestion
 
 EXPECTED_AQI_COLUMNS = {"date", "pm2_5", "no2", "o3", "dust", "european_aqi"}
 EXPECTED_WEATHER_COLUMNS = {"date", "temperature", "wind_speed", "wind_direction", "precipitation", "humidity"}
-DATE_START = datetime(2026, 2, 1, tzinfo=timezone.utc)
+DATE_START = datetime(2026, 2, 1, tzinfo=UTC)
 
 
 def make_mock_hourly(n: int = 720):

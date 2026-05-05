@@ -1,14 +1,15 @@
 from langchain_anthropic import ChatAnthropic
 from langchain_ollama import ChatOllama
-from langgraph.graph import StateGraph, MessagesState, START, END
+from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
-from src.tools import detect_anomaly, get_weather_context, get_current_data, summarize_situation
+
+from src.tools import detect_anomaly, get_current_data, get_weather_context, summarize_situation
 
 TOOLS = [detect_anomaly, get_weather_context, get_current_data, summarize_situation]
 
 #llm = ChatAnthropic(model="claude-sonnet-4-20250514").bind_tools(TOOLS)
-llm = ChatAnthropic(model="claude-haiku-4-5-20251001").bind_tools(TOOLS)
-#llm = ChatOllama(model="llama3.1:8b").bind_tools(TOOLS)
+#llm = ChatAnthropic(model="claude-haiku-4-5-20251001").bind_tools(TOOLS)
+llm = ChatOllama(model="llama3.1:8b").bind_tools(TOOLS)
 
 from langchain_core.messages import SystemMessage
 
