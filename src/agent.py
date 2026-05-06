@@ -1,10 +1,11 @@
 
+import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
 
 from dotenv import load_dotenv
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import AIMessage, SystemMessage
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
@@ -14,7 +15,8 @@ load_dotenv()
 
 TOOLS = [detect_anomaly, get_weather_context, get_current_data, summarize_situation]
 
-snapshot_end = datetime.now().strftime("%B %Y")
+snapshot_end = datetime.now()
+snapshot_start = snapshot_end - timedelta(days=90)
 
 SYSTEM_PROMPT = f"""You are an air quality monitoring assistant for Paris, Île-de-France.
 You have access to tools that provide real-time and historical air quality and weather data.
@@ -27,20 +29,14 @@ Your role is to:
 Guidelines:
 - Always use the available tools before answering — never guess
 - PM2.5 refers to fine particulate matter in general. Dust refers specifically to Saharan dust episodes. Do not confuse them.
-- When an anomaly is detected, you MUST immediately call get_weather_context for the same date — do not ask the user, just call it.
 - When reporting z-scores, explain them as "X standard deviations above the historical average", not as a multiplier
 - Mention multiple pollutants if several have elevated z-scores (> 1.5)
 - Be concise but precise — cite the actual AQI values and thresholds
 - If asked about a Saharan dust episode, check both dust and pm2_5 z-scores
 - For ozone (O3), always report max_day value. If max_day > 100 µg/m³, mention it is approaching the EEA threshold of 120 µg/m³.
-- Data is available from February 2026 to {snapshot_end}. If a date is outside this window, explain it is outside the snapshot range — do not say the date is "in the future".
+- Data is available from {snapshot_start.strftime("%B %Y")} to {snapshot_end.strftime("%B %Y")}. If a date is outside this window, explain it is outside the snapshot range — do not say the date is "in the future".
 - When reporting current data, always mention that measurements may be up to 12 hours old due to CAMS model update frequency.
 - Answer in the same language as the user
-
-Tool calling sequence for anomaly questions:
-1. Call detect_anomaly
-2. If is_anomaly is true → immediately call get_weather_context for the same date
-3. Then provide your final answer
 
 Examples of correct behavior:
 
@@ -58,7 +54,7 @@ User: "What was the air quality on December 1, 2025?"
 → Returns error → Answer: "No data available for this date. Data is available from February to May 2026."
 
 User: "Was there a lot of ozone on April 15, 2026?"
-→ Call detect_anomaly("2026-04-15") → Call get_weather_context("2026-04-15")
+→ If an anomaly is found, explain pollutant severity and meteorological context.
 → Always report O3 max_day (not mean_day). If max_day > 100 µg/m³, mention proximity to EEA threshold of 120 µg/m³.
 
 User: "What caused the poor air quality on March 8, 2026?"
@@ -95,21 +91,88 @@ def build_agent(model: AgentModel = AgentModel.HAIKU):
         """Calls the LLM with the current state."""
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
         return {"messages": [llm.invoke(messages)]}
+    
+    def route_from_agent(state: MessagesState):
+        last = state["messages"][-1]
 
-    def should_continue(state: MessagesState) -> str:
-        """Routes to tools if the LLM called one, otherwise ends."""
-        if state["messages"][-1].tool_calls:
-            return "tools"
+        if not last.tool_calls:
+            return END
+
+        tool_name = last.tool_calls[0]["name"]
+
+        if tool_name == "detect_anomaly":
+            return "anomaly"
+
+        if tool_name == "get_current_data":
+            return "current"
+
+        if tool_name == "summarize_situation":
+            return "summary"
+
+        if tool_name == "get_weather_context":
+            return "weather"
+
         return END
+
+    def route_after_anomaly(state: MessagesState):
+        last = state["messages"][-1]
+        result = json.loads(last.content)
+
+        if result.get("is_anomaly") is True:
+            return "weather"
+
+        return "agent"
+    
+    def force_weather_context(state: MessagesState) -> dict:
+        """Forces a get_weather_context call using the date from the last anomaly result."""
+        for msg in reversed(state["messages"]):
+            try:
+                result = json.loads(msg.content)
+                if date := result.get("date"):
+                    return {"messages": [AIMessage(
+                        content="",
+                        tool_calls=[{
+                            "id": "forced_weather",
+                            "name": "get_weather_context",
+                            "args": {"date": date},
+                            "type": "tool_call"
+                        }]
+                    )]}
+            except (json.JSONDecodeError, TypeError, AttributeError):
+                continue
+        return {"messages": []}
+
+    anomaly_node = ToolNode([detect_anomaly])
+    weather_node = ToolNode([get_weather_context])
+    current_node = ToolNode([get_current_data])
+    summary_node = ToolNode([summarize_situation])
 
     graph = StateGraph(MessagesState)
     graph.add_node("agent", agent)
-    graph.add_node("tools", ToolNode(TOOLS))
+    graph.add_node("anomaly", anomaly_node)
+    graph.add_node("weather", weather_node)
+    graph.add_node("current", current_node)
+    graph.add_node("summary", summary_node)
+
     graph.add_edge(START, "agent")
-    graph.add_conditional_edges("agent", should_continue)
-    graph.add_edge("tools", "agent")
+
+    graph.add_conditional_edges(
+        "agent",
+        route_from_agent
+    )
+
+    graph.add_node("force_weather", force_weather_context)
+    graph.add_conditional_edges("anomaly", route_after_anomaly, {
+        "weather": "force_weather",
+        "agent": "agent"
+    })
+    graph.add_edge("force_weather", "weather")
+
+    graph.add_edge("weather", "agent")
+    graph.add_edge("current", "agent")
+    graph.add_edge("summary", "agent")
 
     return graph.compile()
 
 
-app = build_agent()
+app = build_agent(model=AgentModel.LLAMA)
