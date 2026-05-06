@@ -1,15 +1,12 @@
-from dotenv import load_dotenv
-import streamlit as st
-from langchain_core.messages import HumanMessage, AIMessage
-from src.agent import app
-from src.tools import load_data, compute_threshold
-from dotenv import load_dotenv
-import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import streamlit as st
+from dotenv import load_dotenv
+from langchain_core.messages import AIMessage, HumanMessage
 from plotly.subplots import make_subplots
-from langchain_core.messages import HumanMessage, AIMessage
-from src.agent import app as agent_app
+
+from src.agent import app
+from src.tools import compute_threshold, load_data
 
 load_dotenv()
 

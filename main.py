@@ -7,6 +7,6 @@ load_dotenv()
 
 if __name__ == "__main__":
     result = app.invoke({
-        "messages": [HumanMessage(content="Que s'est t-il passé le 1er mai ?")]
+        "messages": [HumanMessage(content="Y a-t-il eu une anomalie le 8 mars 2026 ?")]
     })
     print(result["messages"])

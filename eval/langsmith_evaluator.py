@@ -58,4 +58,5 @@ class LangSmithEvaluator(BaseEvaluator):
 
 
 if __name__ == "__main__":
-    LangSmithEvaluator(agent_model=AgentModel.HAIKU).run(experiment_prefix="haiku-v2")
+    LangSmithEvaluator(agent_model=AgentModel.LLAMA).run(experiment_prefix="llama-v3")
+    #LangSmithEvaluator(agent_model=AgentModel.HAIKU).run(experiment_prefix="haiku-v3")

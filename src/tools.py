@@ -17,7 +17,7 @@ def load_data() -> pd.DataFrame:
 
 def compute_threshold(df: pd.DataFrame) -> float:
     """Computes the AQI anomaly threshold (daily max mean + 2 std)."""
-    daily_max = df.groupby(df["date"].dt.date)["european_aqi"].max()
+    daily_max = df.groupby(df["date"].dt.date)["european_aqi"].max().dropna()
     return float(daily_max.mean() + 2 * daily_max.std())
 
 
@@ -52,7 +52,7 @@ def detect_anomaly(date: str) -> dict:
         return {"error": f"No data available for {date}"}
 
     # Daily max per day for a consistent baseline
-    aqi_threshold = compute_threshold(df_day)
+    aqi_threshold = compute_threshold(df)
 
     aqi_max = df_day["european_aqi"].max()
     aqi_mean = df_day["european_aqi"].mean()
