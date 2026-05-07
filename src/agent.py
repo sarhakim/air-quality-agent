@@ -111,16 +111,16 @@ def build_agent(model: AgentModel = AgentModel.HAIKU):
         tool_name = last.tool_calls[0]["name"]
 
         if tool_name == "detect_anomaly":
-            return "anomaly"
+            return "detect_anomaly"
 
         if tool_name == "get_current_data":
-            return "current"
+            return "get_current_data"
 
         if tool_name == "summarize_situation":
             return "summary"
 
         if tool_name == "get_weather_context":
-            return "weather"
+            return "get_weather"
 
         return END
 
@@ -158,27 +158,45 @@ def build_agent(model: AgentModel = AgentModel.HAIKU):
 
     graph = StateGraph(MessagesState)
     graph.add_node("agent", agent)
-    graph.add_node("anomaly", anomaly_node)
-    graph.add_node("weather", weather_node)
-    graph.add_node("current", current_node)
+    graph.add_node("detect_anomaly", anomaly_node)
+    graph.add_node("get_weather", weather_node)
+    graph.add_node("get_current_data", current_node)
     graph.add_node("summary", summary_node)
 
     graph.add_edge(START, "agent")
 
     graph.add_conditional_edges(
         "agent",
-        route_from_agent
+        route_from_agent,
+        {
+            "detect_anomaly": "detect_anomaly",
+            "get_weather": "get_weather",
+            "get_current_data": "get_current_data",
+            "summary": "summary",
+            END: END,
+        }
     )
 
-    graph.add_conditional_edges("anomaly", route_after_anomaly)
+    graph.add_conditional_edges(
+        "detect_anomaly",
+        route_after_anomaly,
+        {
+            "weather_from_anomaly": "weather_from_anomaly",
+            "agent": "agent",
+        }
+    )
     graph.add_node("weather_from_anomaly", weather_from_anomaly)
-    graph.add_edge("weather_from_anomaly", "weather")
+    graph.add_edge("weather_from_anomaly", "get_weather")
 
-    graph.add_edge("weather", "agent")
-    graph.add_edge("current", "agent")
+    graph.add_edge("get_weather", "agent")
+    graph.add_edge("get_current_data", "agent")
     graph.add_edge("summary", "agent")
 
     return graph.compile()
 
 
 app = build_agent(model=AgentModel.LLAMA)
+
+print(app.get_graph().draw_ascii())
+
+print(app.get_graph().draw_mermaid())

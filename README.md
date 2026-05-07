@@ -15,19 +15,7 @@ Open-Meteo Archive ───┘                                                 
 
 ### Agent graph architecture
 
-User
- ↓
-Agent
- ↓
-detect_anomaly
- ↓
-if anomaly?
- ├─ yes → weather_context
- └─ no
- ↓
-Agent explains
- ↓
-END
+![Agent Graph](doc/graph.png)
 
 ## Tools
 
