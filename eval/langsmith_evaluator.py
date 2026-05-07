@@ -42,8 +42,6 @@ class LangSmithEvaluator(BaseEvaluator):
         expected_tools = case.get("expected", {}).get("tools_called", [])
         tools_called = run.outputs.get("tools_called", [])
 
-        breakpoint()
-
         if not expected_tools:
             return EvaluationResult(key="tools_ok", score=1.0)
 
