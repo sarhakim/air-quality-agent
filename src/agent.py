@@ -34,16 +34,25 @@ Guidelines:
 - Be concise but precise — cite the actual AQI values and thresholds
 - If asked about a Saharan dust episode, check both dust and pm2_5 z-scores
 - For ozone (O3), always report max_day value. If max_day > 100 µg/m³, mention it is approaching the EEA threshold of 120 µg/m³.
-- Data is available from {snapshot_start.strftime("%B %Y")} to {snapshot_end.strftime("%B %Y")}. If a date is outside this window, explain it is outside the snapshot range — do not say the date is "in the future".
+- Data is available from {snapshot_start.strftime("%Y-%m-%d")} to {snapshot_end.strftime("%Y-%m-%d")}. If a date is outside this window, explain it is outside the snapshot range — do not say the date is "in the future".
 - When reporting current data, always mention that measurements may be up to 12 hours old due to CAMS model update frequency.
 - Answer in the same language as the user
+
+For anomaly reports, use this exact structure:
+1. AQI status
+- AQI max: X
+- Threshold: Y
+2. Main pollutant
+- Pollutant: X
+- Z-score: Y standard deviations above historical average
+3. Contributing factors
+- Weather context
+- Dust episode if relevant
 
 Examples of correct behavior:
 
 User: "Was the air quality bad on March 15, 2026?"
 → Call detect_anomaly("2026-03-15")
-→ is_anomaly=true → immediately call get_weather_context("2026-03-15")
-→ Answer mentioning the main pollutant z-score in standard deviations, AQI values, and meteorological context.
 
 User: "What is the air quality right now?"
 → Call get_current_data()
@@ -54,11 +63,12 @@ User: "What was the air quality on December 1, 2025?"
 → Returns error → Answer: "No data available for this date. Data is available from February to May 2026."
 
 User: "Was there a lot of ozone on April 15, 2026?"
+→ Call detect_anomaly
 → If an anomaly is found, explain pollutant severity and meteorological context.
 → Always report O3 max_day (not mean_day). If max_day > 100 µg/m³, mention proximity to EEA threshold of 120 µg/m³.
 
 User: "What caused the poor air quality on March 8, 2026?"
-→ Call detect_anomaly("2026-03-08") → is_anomaly=true → Call get_weather_context("2026-03-08")
+→ Call detect_anomaly("2026-03-08")
 → When wind_speed_mean < 5 km/h and precipitation=0, describe it as "anticyclonic stagnation conditions" — high pressure blocking wind and preventing pollutant dispersion.
 → Answer: "The anomaly was caused by Saharan dust + elevated PM2.5, amplified by anticyclonic stagnation conditions (weak wind of X km/h, no precipitation, high humidity)."
 """
@@ -119,28 +129,27 @@ def build_agent(model: AgentModel = AgentModel.HAIKU):
         result = json.loads(last.content)
 
         if result.get("is_anomaly") is True:
-            return "weather"
+            return "weather_from_anomaly"
 
         return "agent"
     
-    def force_weather_context(state: MessagesState) -> dict:
-        """Forces a get_weather_context call using the date from the last anomaly result."""
-        for msg in reversed(state["messages"]):
-            try:
-                result = json.loads(msg.content)
-                if date := result.get("date"):
-                    return {"messages": [AIMessage(
-                        content="",
-                        tool_calls=[{
-                            "id": "forced_weather",
-                            "name": "get_weather_context",
-                            "args": {"date": date},
-                            "type": "tool_call"
-                        }]
-                    )]}
-            except (json.JSONDecodeError, TypeError, AttributeError):
-                continue
-        return {"messages": []}
+    def weather_from_anomaly(state: MessagesState):
+        last = state["messages"][-1]
+        result = json.loads(last.content)
+
+        date = result.get("date")
+        return {
+            "messages": [
+                AIMessage(
+                    content="",
+                    tool_calls=[{
+                        "id": "forced_weather",
+                        "name": "get_weather_context",
+                        "args": {"date": date},
+                    }]
+                )
+            ]
+        }
 
     anomaly_node = ToolNode([detect_anomaly])
     weather_node = ToolNode([get_weather_context])
@@ -161,12 +170,9 @@ def build_agent(model: AgentModel = AgentModel.HAIKU):
         route_from_agent
     )
 
-    graph.add_node("force_weather", force_weather_context)
-    graph.add_conditional_edges("anomaly", route_after_anomaly, {
-        "weather": "force_weather",
-        "agent": "agent"
-    })
-    graph.add_edge("force_weather", "weather")
+    graph.add_conditional_edges("anomaly", route_after_anomaly)
+    graph.add_node("weather_from_anomaly", weather_from_anomaly)
+    graph.add_edge("weather_from_anomaly", "weather")
 
     graph.add_edge("weather", "agent")
     graph.add_edge("current", "agent")
