@@ -3,7 +3,7 @@
 A conversational agent that monitors air quality in Paris, detects anomalies, 
 and explains their meteorological causes using real-time and historical data.
 
-**Stack**: LangGraph · Claude Haiku · Open-Meteo · LangSmith · Python 3.12 · uv
+**Stack**: LangGraph · Claude Haiku · Open-Meteo · LangSmith · Python 3.12 · uv . Streamlit
 
 ## Architecture
 
