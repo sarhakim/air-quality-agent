@@ -1,4 +1,3 @@
-
 import json
 import os
 from datetime import datetime, timedelta
@@ -80,6 +79,50 @@ class AgentModel(StrEnum):
     SONNET = "claude-sonnet-4-20250514"
     LLAMA = "llama3.1:8b"
 
+def route_from_agent(state: MessagesState) -> str:
+    """Routes to the appropriate tool node based on the LLM's tool call."""
+    last = state["messages"][-1]
+    if not last.tool_calls:
+        return END
+    tool_name = last.tool_calls[0]["name"]
+    routes = {
+        "detect_anomaly": "detect_anomaly",
+        "get_current_data": "get_current_data",
+        "summarize_situation": "summary",
+        "get_weather_context": "get_weather",
+    }
+    return routes.get(tool_name, END)
+
+
+def route_after_anomaly(state: MessagesState) -> str:
+    """Routes to weather context if anomaly detected, otherwise back to agent."""
+    last = state["messages"][-1]
+    try:
+        result = json.loads(last.content)
+    except (json.JSONDecodeError, TypeError, AttributeError):
+        return "agent"
+    if result.get("is_anomaly") is True:
+        return "weather_from_anomaly"
+    return "agent"
+
+
+def weather_from_anomaly(state: MessagesState) -> dict:
+    """Injects a get_weather_context tool call using the date from the anomaly result."""
+    for msg in reversed(state["messages"]):
+        try:
+            result = json.loads(msg.content)
+            if date := result.get("date"):
+                return {"messages": [AIMessage(
+                    content="",
+                    tool_calls=[{
+                        "id": "forced_weather",
+                        "name": "get_weather_context",
+                        "args": {"date": date},
+                    }]
+                )]}
+        except (json.JSONDecodeError, TypeError, AttributeError):
+            continue
+    return {"messages": []}
 
 def _build_llm(model: AgentModel):
     """Instantiates the right LLM based on the model."""
@@ -101,67 +144,14 @@ def build_agent(model: AgentModel = AgentModel.HAIKU):
         """Calls the LLM with the current state."""
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
         return {"messages": [llm.invoke(messages)]}
-    
-    def route_from_agent(state: MessagesState):
-        last = state["messages"][-1]
-
-        if not last.tool_calls:
-            return END
-
-        tool_name = last.tool_calls[0]["name"]
-
-        if tool_name == "detect_anomaly":
-            return "detect_anomaly"
-
-        if tool_name == "get_current_data":
-            return "get_current_data"
-
-        if tool_name == "summarize_situation":
-            return "summary"
-
-        if tool_name == "get_weather_context":
-            return "get_weather"
-
-        return END
-
-    def route_after_anomaly(state: MessagesState):
-        last = state["messages"][-1]
-        result = json.loads(last.content)
-
-        if result.get("is_anomaly") is True:
-            return "weather_from_anomaly"
-
-        return "agent"
-    
-    def weather_from_anomaly(state: MessagesState):
-        last = state["messages"][-1]
-        result = json.loads(last.content)
-
-        date = result.get("date")
-        return {
-            "messages": [
-                AIMessage(
-                    content="",
-                    tool_calls=[{
-                        "id": "forced_weather",
-                        "name": "get_weather_context",
-                        "args": {"date": date},
-                    }]
-                )
-            ]
-        }
-
-    anomaly_node = ToolNode([detect_anomaly])
-    weather_node = ToolNode([get_weather_context])
-    current_node = ToolNode([get_current_data])
-    summary_node = ToolNode([summarize_situation])
 
     graph = StateGraph(MessagesState)
     graph.add_node("agent", agent)
-    graph.add_node("detect_anomaly", anomaly_node)
-    graph.add_node("get_weather", weather_node)
-    graph.add_node("get_current_data", current_node)
-    graph.add_node("summary", summary_node)
+    graph.add_node("detect_anomaly", ToolNode([detect_anomaly]))
+    graph.add_node("get_weather", ToolNode([get_weather_context]))
+    graph.add_node("get_current_data", ToolNode([get_current_data]))
+    graph.add_node("summary", ToolNode([summarize_situation]))
+    graph.add_node("weather_from_anomaly", weather_from_anomaly)
 
     graph.add_edge(START, "agent")
 
@@ -185,7 +175,6 @@ def build_agent(model: AgentModel = AgentModel.HAIKU):
             "agent": "agent",
         }
     )
-    graph.add_node("weather_from_anomaly", weather_from_anomaly)
     graph.add_edge("weather_from_anomaly", "get_weather")
 
     graph.add_edge("get_weather", "agent")
@@ -195,8 +184,4 @@ def build_agent(model: AgentModel = AgentModel.HAIKU):
     return graph.compile()
 
 
-app = build_agent(model=AgentModel.LLAMA)
-
-print(app.get_graph().draw_ascii())
-
-print(app.get_graph().draw_mermaid())
+app = build_agent()

@@ -20,6 +20,16 @@ def compute_threshold(df: pd.DataFrame) -> float:
     daily_max = df.groupby(df["date"].dt.date)["european_aqi"].max().dropna()
     return float(daily_max.mean() + 2 * daily_max.std())
 
+def compute_pollutant_thresholds(df: pd.DataFrame) -> dict:
+    """Computes anomaly thresholds per pollutant (daily max mean + 2 std)."""
+    thresholds = {}
+    for col in ["pm2_5", "no2", "dust"]:
+        daily_mean = df.groupby(df["date"].dt.date)[col].mean()
+        thresholds[col] = float(daily_mean.mean() + 2 * daily_mean.std())
+    daily_max_o3 = df.groupby(df["date"].dt.date)["o3"].max()
+    thresholds["o3"] = float(daily_max_o3.mean() + 2 * daily_max_o3.std())
+    return thresholds
+
 
 @tool
 def detect_anomaly(date: str) -> dict:
@@ -51,12 +61,12 @@ def detect_anomaly(date: str) -> dict:
     if df_day.empty:
         return {"error": f"No data available for {date}"}
 
-    # Daily max per day for a consistent baseline
     aqi_threshold = compute_threshold(df)
+    pollutant_thresholds = compute_pollutant_thresholds(df)
 
     aqi_max = df_day["european_aqi"].max()
     aqi_mean = df_day["european_aqi"].mean()
-    is_anomaly = bool(aqi_max > aqi_threshold)
+    is_anomaly_aqi = bool(aqi_max > aqi_threshold)
 
     # Identify the main pollutant using z-scores
     pollutants = {}
@@ -79,6 +89,19 @@ def detect_anomaly(date: str) -> dict:
         "warning": "O3 peaks hourly — max may exceed mean significantly" if o3_max > 80 else None,
     }
 
+    # Anomaly per pollutant (same logic as AQI: mean + 2 std)
+    pollutant_values = {
+        "o3": o3_max,  # max_day pour O3, cohérent avec compute_pollutant_thresholds
+        "no2": pollutants["no2"]["mean_day"],
+        "pm2_5": pollutants["pm2_5"]["mean_day"],
+        "dust": pollutants["dust"]["mean_day"],
+    }
+    anomalous_pollutants = [
+        p for p in pollutant_values
+        if pollutant_values[p] > pollutant_thresholds[p]
+    ]
+
+    is_anomaly = is_anomaly_aqi or bool(anomalous_pollutants)
     main_pollutant = max(pollutants, key=lambda x: pollutants[x]["z_score"])
 
     return {
@@ -87,6 +110,8 @@ def detect_anomaly(date: str) -> dict:
         "aqi_mean": round(float(aqi_mean), 1),
         "aqi_threshold": round(float(aqi_threshold), 1),
         "is_anomaly": is_anomaly,
+        "is_anomaly_aqi": is_anomaly_aqi,
+        "anomalous_pollutants": anomalous_pollutants,  # [] si aucun
         "pollutants": pollutants,
         "main_pollutant": main_pollutant
     }
