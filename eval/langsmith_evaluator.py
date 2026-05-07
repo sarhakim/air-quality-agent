@@ -41,7 +41,15 @@ class LangSmithEvaluator(BaseEvaluator):
         case = self.dataset_by_id.get(case_id, {})
         expected_tools = case.get("expected", {}).get("tools_called", [])
         tools_called = run.outputs.get("tools_called", [])
-        score = int(all(t in tools_called for t in expected_tools))
+
+        breakpoint()
+
+        if not expected_tools:
+            return EvaluationResult(key="tools_ok", score=1.0)
+
+        matched = sum(1 for t in expected_tools if t in tools_called)
+        score = round(matched / len(expected_tools), 2)
+
         return EvaluationResult(key="tools_ok", score=score)
 
     def _judge_evaluator(self, run: Run, example: Example) -> list[dict]:
@@ -59,4 +67,4 @@ class LangSmithEvaluator(BaseEvaluator):
 
 if __name__ == "__main__":
     LangSmithEvaluator(agent_model=AgentModel.LLAMA).run(experiment_prefix="llama-v3")
-    #LangSmithEvaluator(agent_model=AgentModel.HAIKU).run(experiment_prefix="haiku-v3")
+    LangSmithEvaluator(agent_model=AgentModel.HAIKU).run(experiment_prefix="haiku-v3")

@@ -55,15 +55,20 @@ Evaluated with Claude Haiku as LLM-as-judge, tracked via LangSmith.
 
 
 ### Results
- 
-4 experiments — varying model (Haiku vs Llama 3.1 8B) and prompt engineering (with/without detailed docstrings and few-shot examples):
+
+6 experiments across 3 axes: 
+- model (Claude Haiku vs Llama 3.1 8B)
+- prompt engineering (baseline vs detailed tool docstrings + few-shot examples)
+- graph architecture (standard ReAct loop vs forced `get_weather_context` call when `detect_anomaly` returns `is_anomaly=true`).
  
 | Experiment | Tools OK | Judge Score | Latency P50 | Cost (15 cases) |
 |---|---|---|---|---|
 | Llama 3.1 8B — baseline | 73% | 0.62 | 8.6s | $0 |
-| Llama 3.1 8B — docstrings + examples | 67% | 0.77 | 9.1s | $0 |
 | Claude Haiku — baseline | 87% | 0.74 | 3.9s | $0.07 |
+| Llama 3.1 8B — docstrings + examples | 67% | 0.77 | 9.1s | $0 |
 | Claude Haiku — docstrings + examples | 93% | **0.88** | 4.9s | $0.12 |
+| Llama 3.1 8B — forced graph | 100% | 0.77 | 10s | $0 |
+| Claude Haiku — forced graph | 100% | **0.90** | 4.3s | $0.10 |
 
  
 ![Results](doc/experiments_comparison.png)
